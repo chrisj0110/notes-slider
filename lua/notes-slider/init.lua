@@ -1,5 +1,17 @@
 local M = {}
 
+local horizontal_split_size = '15'
+local vertical_split_size = '70'
+
+function M.setup(config)
+    if config and config.horizontal_split_size then
+        horizontal_split_size = config.horizontal_split_size
+    end
+    if config and config.vertical_split_size then
+        vertical_split_size = config.vertical_split_size
+    end
+end
+
 vim = vim
 
 -- Save cursor position per buffer
@@ -29,10 +41,10 @@ function M.toggle_scratch(vertical)
             vim.cmd('set splitright')
             vim.cmd('vsplit ' .. scratch_file)
             vim.cmd('set nosplitright')
-            vim.cmd('vertical resize 70')
+            vim.cmd('vertical resize ' .. vertical_split_size)
         else
             vim.cmd('silent! split ' .. scratch_file)
-            vim.cmd('resize 15')
+            vim.cmd('resize ' .. horizontal_split_size)
         end
     else
         -- Save cursor position before closing the buffer
@@ -52,10 +64,10 @@ function M.toggle_scratch(vertical)
             vim.cmd('set splitright')
             vim.cmd('vsplit | buffer ' .. buf)
             vim.cmd('set nosplitright')
-            vim.cmd('vertical resize 70')
+            vim.cmd('vertical resize ' .. vertical_split_size)
         else
             vim.cmd('split | buffer ' .. buf)
-            vim.cmd('resize 15')
+            vim.cmd('resize ' .. horizontal_split_size)
         end
     end
 

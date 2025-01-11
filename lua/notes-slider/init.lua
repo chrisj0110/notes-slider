@@ -46,39 +46,69 @@ local function get_tmux_session_name()
     return session_name
 end
 
-function M.toggle_scratch_using_tmux_name(vertical)
-    M.toggle_scratch(vertical, get_tmux_session_name())
+function M.toggle_scratch_using_tmux_name(vertical, after)
+    M.toggle_scratch(vertical, after, get_tmux_session_name())
 end
 
-local function open_vertical_split(file_or_buf, is_buf, split_size)
-    vim.cmd('set splitright')
+local function open_vertical_split(file_or_buf, is_buf, after, split_size)
+    local original_splitright = vim.o.splitright
+    if after then
+        vim.cmd('set splitright')
+    else
+        vim.cmd('set nosplitright')
+    end
+
     if is_buf then
         vim.cmd('vsplit | buffer' .. file_or_buf)
     else
         vim.cmd('vsplit ' .. file_or_buf)
     end
-    vim.cmd('set nosplitright')
+
+    if after and not original_splitright then
+        -- if after=true and it was nosplitright then set it to nosplitright
+        vim.cmd('set nosplitright')
+    elseif not after and original_splitright then
+        -- if after=false and it was splitright then set it to splitright
+        vim.cmd('set splitright')
+    end
+
     vim.cmd('vertical resize ' .. split_size)
 end
 
-local function open_horizontal_split(file_or_buf, is_buf, split_size)
+local function open_horizontal_split(file_or_buf, is_buf, after, split_size)
+    local original_splitbelow = vim.o.splitbelow
+    if after then
+        vim.cmd('set splitbelow')
+    else
+        vim.cmd('set nosplitbelow')
+    end
+
     if is_buf then
         vim.cmd('split | buffer ' .. file_or_buf)
     else
         vim.cmd('split ' .. file_or_buf)
     end
+
+    if after and not original_splitbelow then
+        -- if after=true and it was nosplitbelow then set it to nosplitbelow
+        vim.cmd('set nosplitbelow')
+    elseif not after and original_splitbelow then
+        -- if after=false and it was splitbelow then set it to splitbelow
+        vim.cmd('set splitbelow')
+    end
+
     vim.cmd('resize ' .. split_size)
 end
 
-function M.toggle_scratch(vertical, scratch_file_name)
+function M.toggle_scratch(vertical, after, scratch_file_name)
     local scratch_file = scratch_file_dir .. "/" .. scratch_file_prefix .. scratch_file_name .. "." .. scratch_file_extension
 
     local buf = vim.fn.bufnr(scratch_file)
     if buf == -1 then
         if vertical then
-            open_vertical_split(scratch_file, false, vertical_split_size)
+            open_vertical_split(scratch_file, false, after, vertical_split_size)
         else
-            open_horizontal_split(scratch_file, false, horizontal_split_size)
+            open_horizontal_split(scratch_file, false, after, horizontal_split_size)
         end
     else
         -- Save cursor position before closing the buffer
@@ -95,9 +125,9 @@ function M.toggle_scratch(vertical, scratch_file_name)
         end
         -- if the buffer exists but not in a window, open in a new split
         if vertical then
-            open_vertical_split(buf, true, vertical_split_size)
+            open_vertical_split(buf, true, after, vertical_split_size)
         else
-            open_horizontal_split(buf, true, horizontal_split_size)
+            open_horizontal_split(buf, true, after, horizontal_split_size)
         end
     end
 

@@ -12,7 +12,7 @@ Slide in a buffer to take notes
 
 Here is how you can install and configure it using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
-```
+```lua
 return {
     "chrisj0110/notes-slider",
     config = function()
@@ -41,7 +41,9 @@ return {
 
 Or you can call functions directly, for example:
 
-`:lua require("notes-slider").toggle_scratch(false, false, "abc")`
+```lua
+:lua require("notes-slider").toggle_scratch(false, false, "abc")
+```
 
 Calling the same function/mapping again toggles it open/closed.
 

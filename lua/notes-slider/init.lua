@@ -50,19 +50,35 @@ function M.toggle_scratch_using_tmux_name(vertical)
     M.toggle_scratch(vertical, get_tmux_session_name())
 end
 
+local function open_vertical_split(file_or_buf, is_buf, split_size)
+    vim.cmd('set splitright')
+    if is_buf then
+        vim.cmd('vsplit | buffer' .. file_or_buf)
+    else
+        vim.cmd('vsplit ' .. file_or_buf)
+    end
+    vim.cmd('set nosplitright')
+    vim.cmd('vertical resize ' .. split_size)
+end
+
+local function open_horizontal_split(file_or_buf, is_buf, split_size)
+    if is_buf then
+        vim.cmd('split | buffer ' .. file_or_buf)
+    else
+        vim.cmd('split ' .. file_or_buf)
+    end
+    vim.cmd('resize ' .. split_size)
+end
+
 function M.toggle_scratch(vertical, scratch_file_name)
     local scratch_file = scratch_file_dir .. "/" .. scratch_file_prefix .. scratch_file_name .. "." .. scratch_file_extension
 
     local buf = vim.fn.bufnr(scratch_file)
     if buf == -1 then
         if vertical then
-            vim.cmd('set splitright')
-            vim.cmd('vsplit ' .. scratch_file)
-            vim.cmd('set nosplitright')
-            vim.cmd('vertical resize ' .. vertical_split_size)
+            open_vertical_split(scratch_file, false, vertical_split_size)
         else
-            vim.cmd('silent! split ' .. scratch_file)
-            vim.cmd('resize ' .. horizontal_split_size)
+            open_horizontal_split(scratch_file, false, horizontal_split_size)
         end
     else
         -- Save cursor position before closing the buffer
@@ -79,13 +95,9 @@ function M.toggle_scratch(vertical, scratch_file_name)
         end
         -- if the buffer exists but not in a window, open in a new split
         if vertical then
-            vim.cmd('set splitright')
-            vim.cmd('vsplit | buffer ' .. buf)
-            vim.cmd('set nosplitright')
-            vim.cmd('vertical resize ' .. vertical_split_size)
+            open_vertical_split(buf, true, vertical_split_size)
         else
-            vim.cmd('split | buffer ' .. buf)
-            vim.cmd('resize ' .. horizontal_split_size)
+            open_horizontal_split(buf, true, horizontal_split_size)
         end
     end
 

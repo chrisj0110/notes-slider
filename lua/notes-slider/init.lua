@@ -36,9 +36,12 @@ local function get_tmux_session_name()
     return session_name
 end
 
-function M.toggle_scratch(vertical)
-    local tmux_session = get_tmux_session_name()
-    local scratch_file = "~/" .. scratch_file_prefix .. tmux_session .. ".txt"
+function M.toggle_scratch_using_tmux_name(vertical)
+    M.toggle_scratch(vertical, get_tmux_session_name())
+end
+
+function M.toggle_scratch(vertical, scratch_file_name)
+    local scratch_file = "~/" .. scratch_file_prefix .. scratch_file_name .. ".txt"
 
     local buf = vim.fn.bufnr(scratch_file)
     if buf == -1 then

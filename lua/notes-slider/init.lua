@@ -3,6 +3,7 @@ local M = {}
 local horizontal_split_size = '15'
 local vertical_split_size = '70'
 local scratch_file_prefix = 'scratch-'
+local scratch_file_extension = 'txt'
 local scratch_file_dir = os.getenv("HOME")
 
 function M.setup(config)
@@ -15,6 +16,10 @@ function M.setup(config)
 
     if config and config.scratch_file_prefix then
         scratch_file_prefix = config.scratch_file_prefix
+    end
+
+    if config and config.scratch_file_extension then
+        scratch_file_extension = config.scratch_file_extension
     end
 
     if config and config.scratch_file_dir then
@@ -46,7 +51,7 @@ function M.toggle_scratch_using_tmux_name(vertical)
 end
 
 function M.toggle_scratch(vertical, scratch_file_name)
-    local scratch_file = scratch_file_dir .. "/" .. scratch_file_prefix .. scratch_file_name .. ".txt"
+    local scratch_file = scratch_file_dir .. "/" .. scratch_file_prefix .. scratch_file_name .. "." .. scratch_file_extension
 
     local buf = vim.fn.bufnr(scratch_file)
     if buf == -1 then

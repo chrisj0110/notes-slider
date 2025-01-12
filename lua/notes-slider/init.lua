@@ -1,11 +1,26 @@
+---@class Config
+---@field tag string|nil custom tag to use
+---@field auto_save boolean|nil whether to save the buffer once tweaking it
+---@field horizontal_split_size integer|nil how tall the horizontal notes buffer is
+---@field vertical_split_size integer|nil how wide the vertical notes buffer is
+---@field scratch_file_prefix string|nil default notes file prefix
+---@field scratch_file_extension string|nil default notes file extension
+---@field scratch_file_dir string|nil default dir to save notes file
 local M = {}
 
-local horizontal_split_size = '15'
-local vertical_split_size = '70'
+---@type integer
+local horizontal_split_size = 15
+---@type integer
+local vertical_split_size = 70
+---@type string
 local scratch_file_prefix = 'scratch-'
+---@type string
 local scratch_file_extension = 'txt'
-local scratch_file_dir = os.getenv("HOME")
+---@type string
+local scratch_file_dir = os.getenv("HOME") or "~"
 
+---Set values based on user's configuration
+---@param config Config
 function M.setup(config)
     if config and config.horizontal_split_size then
         horizontal_split_size = config.horizontal_split_size
@@ -30,14 +45,19 @@ end
 vim = vim
 
 -- Save cursor position per buffer
+---@type table<integer, { [1]: integer, [2]: integer}>
 local cursor_positions = {}
 
+---get name of the current tmux session, or empty string
+---@return string
 local function get_tmux_session_name()
     -- Run the tmux command to get the session name
+    ---@type file*?
     local handle = io.popen("tmux display-message -p '#S'")
     if handle == nil then
         return ""
     end
+    ---@type string
     local session_name = handle:read("*a")
     handle:close()
 
@@ -46,11 +66,20 @@ local function get_tmux_session_name()
     return session_name
 end
 
+---toggle the window open/closed with the file name generated from tmux session name
+---@param vertical boolean whether it's a vertical split or horizontal split
+---@param after boolean whether the notes buffer will come below/right of the current buffer
 function M.toggle_scratch_using_tmux_name(vertical, after)
     M.toggle_scratch(vertical, after, get_tmux_session_name())
 end
 
+---open a vertical split
+---@param file_or_buf string file name or buffer number (string)
+---@param is_buf boolean whether file_or_buf is a buffer or not
+---@param after boolean whether the notes buffer will come below/right of the current buffer
+---@param split_size integer the size of the window to open the notes buffer in
 local function open_vertical_split(file_or_buf, is_buf, after, split_size)
+    ---@type boolean
     local original_splitright = vim.o.splitright
     if after then
         vim.cmd('set splitright')
@@ -75,7 +104,13 @@ local function open_vertical_split(file_or_buf, is_buf, after, split_size)
     vim.cmd('vertical resize ' .. split_size)
 end
 
+---open a horizontal split
+---@param file_or_buf string file name or buffer number (string)
+---@param is_buf boolean whether file_or_buf is a buffer or not
+---@param after boolean whether the notes buffer will come below/right of the current buffer
+---@param split_size integer the size of the window to open the notes buffer in
 local function open_horizontal_split(file_or_buf, is_buf, after, split_size)
+    ---@type boolean
     local original_splitbelow = vim.o.splitbelow
     if after then
         vim.cmd('set splitbelow')
@@ -100,9 +135,14 @@ local function open_horizontal_split(file_or_buf, is_buf, after, split_size)
     vim.cmd('resize ' .. split_size)
 end
 
+---toggle open/closed the notes window
+---@param vertical boolean whether it's a vertical split or horizontal split
+---@param after boolean whether the notes buffer will come below/right of the current buffer
+---@param scratch_file_name string inner part of the file name - can be tmux session name, or custom value
 function M.toggle_scratch(vertical, after, scratch_file_name)
     local scratch_file = scratch_file_dir .. "/" .. scratch_file_prefix .. scratch_file_name .. "." .. scratch_file_extension
 
+    ---@type integer
     local buf = vim.fn.bufnr(scratch_file)
     if buf == -1 then
         if vertical then
@@ -117,7 +157,9 @@ function M.toggle_scratch(vertical, after, scratch_file_name)
         end
 
         -- Close the window containing the scratch file if it's open
-        for _, win in ipairs(vim.api.nvim_list_wins()) do
+        ---@type integer[]
+        local wins = vim.api.nvim_list_wins()
+        for _, win in ipairs(wins) do
             if vim.api.nvim_win_get_buf(win) == buf then
                 vim.cmd('bdelete ' .. buf)
                 return
@@ -125,9 +167,9 @@ function M.toggle_scratch(vertical, after, scratch_file_name)
         end
         -- if the buffer exists but not in a window, open in a new split
         if vertical then
-            open_vertical_split(buf, true, after, vertical_split_size)
+            open_vertical_split(tostring(buf), true, after, vertical_split_size)
         else
-            open_horizontal_split(buf, true, after, horizontal_split_size)
+            open_horizontal_split(tostring(buf), true, after, horizontal_split_size)
         end
     end
 

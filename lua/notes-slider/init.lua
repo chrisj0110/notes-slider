@@ -161,7 +161,17 @@ function M.toggle_scratch(vertical, after, scratch_file_name)
         local wins = vim.api.nvim_list_wins()
         for _, win in ipairs(wins) do
             if vim.api.nvim_win_get_buf(win) == buf then
-                vim.cmd('bdelete ' .. buf)
+                if vim.api.nvim_buf_get_option(buf, "modified") then
+                    local choice = vim.fn.input("Buffer has unsaved changes - (s)ave, (d)iscard, (c)ancel: ")
+                    if choice == "s" then
+                        vim.cmd('write')
+                        vim.cmd('bdelete ' .. buf)
+                    elseif choice == "d" then
+                        vim.cmd('bdelete! ' .. buf)
+                    end
+                else
+                    vim.cmd('bdelete ' .. buf)
+                end
                 return
             end
         end

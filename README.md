@@ -13,9 +13,9 @@ return {
     "chrisj0110/notes-slider",
     config = function()
         require('notes-slider').setup({
-            scratch_file_prefix = "scratch-", -- default is "scratch-"
-            scratch_file_extension = "md", -- default is "txt"
-            scratch_file_dir = "~/bin", -- default is $HOME
+            notes_file_prefix = "scratch-", -- default is "notes-"
+            notes_file_extension = "md", -- default is "txt"
+            notes_file_dir = "~/bin", -- default is $HOME
         })
 
         -- how you split windows is up to you. Below is how I have mine setup.

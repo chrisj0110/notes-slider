@@ -1,8 +1,0 @@
-1. slide in notes buffer from the top
-
-2. slide in notes buffer from the right
-
-3. slide in notes buffer from the bottom
-
-4. slide in notes buffer from the left
-

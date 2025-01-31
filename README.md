@@ -29,12 +29,16 @@ return {
         -- second param is whether you want the notes buffer "after" the current one (i.e. "right"/"below" the current one, depending on horizontal vs vertical)
         vim.api.nvim_set_keymap('n', '[s', ':lua require("notes-slider").toggle_scratch_using_tmux_name(false, false)<CR>', { noremap = true, silent = true })
         vim.api.nvim_set_keymap('n', ']s', ':lua require("notes-slider").toggle_scratch_using_tmux_name(true, true)<CR>', { noremap = true, silent = true })
+        -- or if you want to just open the file in the current buffer, use toggle_open_scratch_using_tmux_name(). If open it will toggle back to previous buffer
+        vim.api.nvim_set_keymap('n', '-s', ':lua require("notes-slider").toggle_open_scratch_using_tmux_name()<CR>', { noremap = true, silent = true })
 
         -- or if you don't want to automatically use the tmux name, just call toggle_scratch()
         -- first two params are the same as above
         -- third param is the text to put in the file name instead of the tmux session name
         vim.api.nvim_set_keymap('n', '[s', ':lua require("notes-slider").toggle_scratch(false, false, "abc")<CR>', { noremap = true, silent = true })
         vim.api.nvim_set_keymap('n', ']s', ':lua require("notes-slider").toggle_scratch(true, true, "abc")<CR>', { noremap = true, silent = true })
+        -- or if you want to just open the file in the current buffer, use toggle_open_scratch_using_tmux_name(). If open it will toggle back to previous buffer
+        vim.api.nvim_set_keymap('n', '-s', ':lua require("notes-slider").toggle_open_scratch("abc")<CR>', { noremap = true, silent = true })
     end
 }
 ```

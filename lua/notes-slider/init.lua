@@ -73,6 +73,11 @@ function M.toggle_scratch_using_tmux_name(vertical, after)
     M.toggle_scratch(vertical, after, get_tmux_session_name())
 end
 
+---toggle open/closed in the current the window with the file name generated from tmux session name
+function M.toggle_open_scratch_using_tmux_name()
+    M.toggle_open_scratch(get_tmux_session_name())
+end
+
 ---open a vertical split
 ---@param file_or_buf string file name or buffer number (string)
 ---@param is_buf boolean whether file_or_buf is a buffer or not
@@ -135,12 +140,17 @@ local function open_horizontal_split(file_or_buf, is_buf, after, split_size)
     vim.cmd('resize ' .. split_size)
 end
 
+---@param scratch_file_name string inner part of the file name - can be tmux session name, or custom value
+local function get_scratch_file(scratch_file_name)
+    return scratch_file_dir .. "/" .. scratch_file_prefix .. scratch_file_name .. "." .. scratch_file_extension
+end
+
 ---toggle open/closed the notes window
 ---@param vertical boolean whether it's a vertical split or horizontal split
 ---@param after boolean whether the notes buffer will come below/right of the current buffer
 ---@param scratch_file_name string inner part of the file name - can be tmux session name, or custom value
 function M.toggle_scratch(vertical, after, scratch_file_name)
-    local scratch_file = scratch_file_dir .. "/" .. scratch_file_prefix .. scratch_file_name .. "." .. scratch_file_extension
+    local scratch_file = get_scratch_file(scratch_file_name)
 
     ---@type integer
     local buf = vim.fn.bufnr(scratch_file)
@@ -191,6 +201,21 @@ function M.toggle_scratch(vertical, after, scratch_file_name)
         else
             vim.api.nvim_win_set_cursor(0, cursor_positions[buf])
         end
+    end
+end
+
+---toggle open/closed the notes file in the current window
+---@param scratch_file_name string inner part of the file name - can be tmux session name, or custom value
+function M.toggle_open_scratch(scratch_file_name)
+    local scratch_file = get_scratch_file(scratch_file_name)
+
+    local current_buf = vim.api.nvim_get_current_buf()
+    local current_file = vim.api.nvim_buf_get_name(current_buf)
+
+    if current_file == scratch_file then
+        vim.cmd('b#')
+    else
+        vim.cmd('e ' .. scratch_file)
     end
 end
 

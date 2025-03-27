@@ -54,7 +54,7 @@ end
 
 ---open in the current the window the file name generated from tmux session name
 function M.open_notes_using_tmux_session_name()
-    M.open_notes(get_tmux_session_name())
+    M.open_notes(string.gsub(get_tmux_session_name(), "/", "-slash-"))
 end
 
 ---open the notes file in the current window
